@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { supabase } from "./lib/supabaseClient";
 import {
   AreaChart,
   Area,
@@ -239,7 +240,86 @@ export default function App() {
   const [ldrValue, setLdrValue] = useState(1200)
   const [pirUntil, setPirUntil] = useState<number[]>(() => posteDefinitions.map(() => 0))
   const [now, setNow] = useState(() => Date.now())
+  const [supabaseConnected, setSupabaseConnected] = useState(false);
 
+useEffect(() => {
+  let mounted = true;
+
+  async function loadState() {
+    const { data, error } = await supabase
+      .from("luzsmart_estado")
+      .select("*")
+      .eq("id", 1)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Erro ao ler Supabase:", error.message);
+      return;
+    }
+
+    if (!mounted || !data) return;
+
+    if (typeof data.ldr_value === "number") {
+      setLdrValue(data.ldr_value);
+    }
+
+    if (Array.isArray(data.pir_states)) {
+      setPirUntil(
+        data.pir_states.map((active: boolean) =>
+          active ? Date.now() + 10_000 : 0
+        )
+      );
+    }
+
+    setSupabaseConnected(true);
+  }
+
+  loadState();
+
+  const channel = supabase
+    .channel("luzsmart-estado")
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "luzsmart_estado",
+        filter: "id=eq.1",
+      },
+      (payload) => {
+        const data = payload.new as {
+          ldr_value?: number;
+          pir_states?: boolean[];
+        };
+
+        if (!mounted) return;
+
+        if (typeof data.ldr_value === "number") {
+          setLdrValue(data.ldr_value);
+        }
+
+        if (Array.isArray(data.pir_states)) {
+          setPirUntil(
+            data.pir_states.map((active) =>
+              active ? Date.now() + 10_000 : 0
+            )
+          );
+        }
+
+        setSupabaseConnected(true);
+      }
+    )
+    .subscribe((status) => {
+      if (mounted && status === "SUBSCRIBED") {
+        setSupabaseConnected(true);
+      }
+    });
+
+  return () => {
+    mounted = false;
+    supabase.removeChannel(channel);
+  };
+}, []);
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 500)
     return () => window.clearInterval(timer)
