@@ -1,0 +1,230 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import 'tailwindcss';
+
+@theme inline {
+  --color-background: #060e1f;
+  --color-surface: #0d1b36;
+  --color-surface-2: #112047;
+  --color-border: rgba(255,255,255,0.07);
+  --color-amber: #f5a623;
+  --color-amber-dim: #c47f0e;
+  --color-amber-glow: rgba(245,166,35,0.15);
+  --color-sky: #3b82f6;
+  --color-sky-dim: #1d4ed8;
+  --color-muted: #4a5a7a;
+  --color-text: #e2e8f5;
+  --color-text-dim: #8a9bbf;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.08) transparent;
+}
+
+*::-webkit-scrollbar { width: 4px; height: 4px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #060e1f;
+  color: #e2e8f5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+html,
+body,
+#root {
+  min-width: 320px;
+  min-height: 100%;
+}
+
+.page-frame {
+  height: 100%;
+}
+
+@media (max-width: 900px) {
+  .app-shell {
+    display: block !important;
+    height: auto !important;
+    min-height: 100vh;
+    overflow: visible !important;
+  }
+
+  .sidebar {
+    position: relative;
+    z-index: 10;
+    height: auto !important;
+    grid-template-rows: auto auto !important;
+    overflow: visible !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .sidebar > :first-child {
+    padding: 12px 16px !important;
+  }
+
+  .sidebar-nav {
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    padding: 8px 10px 10px !important;
+  }
+
+  .sidebar-nav button {
+    width: auto !important;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .menu-label,
+  .system-status {
+    display: none;
+  }
+
+  .main-area {
+    height: auto !important;
+    min-height: calc(100vh - 116px);
+    overflow: visible !important;
+    grid-template-rows: auto 1fr !important;
+  }
+
+  .app-header {
+    min-height: 60px;
+    padding: 8px 16px !important;
+    gap: 16px;
+  }
+
+  .header-meta > .mono,
+  .header-meta > :last-child {
+    display: none !important;
+  }
+
+  .content-area {
+    display: block !important;
+    padding: 14px 16px 24px !important;
+    overflow: visible !important;
+  }
+
+  .page-frame,
+  .dashboard-page,
+  .reports-page,
+  .detail-page {
+    height: auto;
+  }
+
+  .dashboard-page,
+  .reports-page {
+    grid-template-rows: auto auto !important;
+  }
+
+  .kpi-grid {
+    height: auto !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .kpi-grid > div {
+    min-height: 82px;
+  }
+
+  .post-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: none !important;
+  }
+
+  .post-grid > button {
+    min-height: 154px;
+  }
+
+  .map-layout,
+  .reports-layout,
+  .detail-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .map-layout > :first-child {
+    min-height: 440px;
+  }
+
+  .reports-layout > :first-child {
+    min-height: 380px;
+  }
+
+  .settings-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .settings-layout .simulation-panel {
+    grid-column: auto !important;
+  }
+
+  .simulation-controls {
+    grid-template-columns: 1fr !important;
+  }
+
+  .pir-controls {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .app-header {
+    align-items: flex-start !important;
+  }
+
+  .app-header h1 {
+    font-size: 14px !important;
+  }
+
+  .app-header p {
+    max-width: 220px;
+  }
+
+  .header-meta > :first-child {
+    white-space: nowrap;
+  }
+
+  .kpi-grid,
+  .post-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .post-grid > button {
+    min-height: 150px;
+  }
+
+  .map-layout > :first-child {
+    min-height: 360px;
+  }
+
+  .alerts-panel {
+    padding: 14px !important;
+  }
+
+  .alerts-panel > div:first-child {
+    gap: 12px;
+  }
+
+  .alerts-panel > div:last-child > div {
+    grid-template-columns: 48px 10px 1fr !important;
+  }
+
+  .alerts-panel > div:last-child > div > :last-child {
+    display: none;
+  }
+
+  .detail-layout > :first-child {
+    padding: 18px !important;
+  }
+
+  .detail-layout > :first-child > div:nth-child(2) {
+    grid-template-columns: 1fr !important;
+  }
+
+  .pir-controls {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
