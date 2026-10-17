@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { enviarEstadoLuzSmart } from "./lib/luzsmartSync";
 import { supabase } from "./lib/supabaseClient";
 import {
   AreaChart,
@@ -241,7 +242,7 @@ export default function App() {
   const [pirUntil, setPirUntil] = useState<number[]>(() => posteDefinitions.map(() => 0))
   const [now, setNow] = useState(() => Date.now())
   const [supabaseConnected, setSupabaseConnected] = useState(false);
-
+  const [initialStateLoaded, setInitialStateLoaded] = useState(false);
 useEffect(() => {
   let mounted = true;
 
@@ -272,6 +273,7 @@ useEffect(() => {
     }
 
     setSupabaseConnected(true);
+    setInitialStateLoaded(true);
   }
 
   loadState();
@@ -325,28 +327,64 @@ useEffect(() => {
     return () => window.clearInterval(timer)
   }, [])
 
-  const isDay = ldrValue >= 1800
-  const activePirs = pirUntil.map((expiry) => pirMode && expiry > now)
-  const postes: Poste[] = posteDefinitions.map((definition, index) => {
-    const neighbourActive = activePirs[index - 1] || activePirs[index + 1]
-    const intensidade = !autoMode || isDay
-      ? 0
-      : activePirs[index]
-        ? 100
-        : neighbourActive
-          ? 60
-          : 30
+ const isDay = ldrValue >= 1800;
+ const activePirs = pirUntil.map((expiry) => pirMode && expiry > now);
 
-    return {
-      ...definition,
-      aceso: intensidade > 0,
-      intensidade,
-      pir: activePirs[index],
-      ultima: activePirs[index] ? "movimento agora" : "valor simulado",
+const intensitiesForSync = posteDefinitions.map((_, index) => {
+  const neighbourActive =
+    activePirs[index - 1] || activePirs[index + 1];
+
+  if (!autoMode || isDay) return 0;
+  if (activePirs[index]) return 100;
+  if (neighbourActive) return 60;
+  return 30;
+});
+
+useEffect(() => {
+  if (!initialStateLoaded) return;
+
+  async function syncState() {
+    try {
+      await enviarEstadoLuzSmart({
+        ldrValue,
+        pirStates: activePirs,
+        poleIntensities: intensitiesForSync,
+      });
+    } catch (error) {
+      console.error("Falha ao sincronizar LuzSmart:", error);
     }
-  })
-  const selectedPoste = postes.find((poste) => poste.id === selectedPosteId) ?? null
+  }
 
+  void syncState();
+}, [
+  initialStateLoaded,
+  ldrValue,
+  autoMode,
+  pirMode,
+  activePirs.join(","),
+]);
+
+  const postes: Poste[] = posteDefinitions.map((definition, index) => {
+  const neighbourActive = activePirs[index - 1] || activePirs[index + 1];
+
+  const intensidade = !autoMode || isDay
+    ? 0
+    : activePirs[index]
+      ? 100
+      : neighbourActive
+        ? 60
+        : 30;
+
+  return {
+    ...definition,
+    aceso: intensidade > 0,
+    intensidade,
+    pir: activePirs[index],
+    ultima: activePirs[index] ? "movimento agora" : "valor simulado",
+  };
+});
+
+const selectedPoste = postes.find((poste) => poste.id === selectedPosteId) ?? null;
   const totalPostes = postes.length
   const acesos = postes.filter((p) => p.aceso).length
   const apagados = totalPostes - acesos
