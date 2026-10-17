@@ -1,0 +1,10 @@
+{
+  "description": "Monitors and visualizes smart public lighting status and energy savings with real-time indicators, detailed lamp cards, and consumption comparison charts.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
