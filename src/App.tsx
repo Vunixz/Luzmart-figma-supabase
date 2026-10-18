@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-import { enviarEstadoLuzSmart } from "./lib/luzsmartSync";
 import { supabase } from "./lib/supabaseClient";
 import {
   AreaChart,
